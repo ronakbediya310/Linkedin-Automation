@@ -1,0 +1,48 @@
+# Node modules
+/node_modules/
+
+# Environment variables
+.env
+.env.local
+.env.*.local
+
+# Logs
+logs/
+*.log
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+
+# TypeScript build outputs
+dist/
+build/
+
+# Playwright screenshots and videos
+screenshots/
+videos/
+
+# Session data
+sessions/
+
+# IDE/editor config files
+.vscode/
+.idea/
+*.suo
+*.ntvs*
+*.njsproj
+*.sln
+
+# OS files
+.DS_Store
+Thumbs.db
+
+# ts-node cache
+.ts-node/
+
+# Optional npm cache folder
+.npm/
+
+# Lock files
+package-lock.json
+yarn.lock
+pnpm-lock.yaml
