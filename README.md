@@ -48,3 +48,5 @@ Automate LinkedIn login and browser interactions with Playwright using human-lik
 
       -  --headless: Run browser in headless mode (default is false)
 
+## Work flow:
+![alt text](image.png)
