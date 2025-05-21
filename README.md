@@ -30,3 +30,21 @@ Automate LinkedIn login and browser interactions with Playwright using human-lik
    ```bash
    git clone https://github.com/ronakbediya310/Linkedin-Automation.git
    cd Linkedin-Automation
+   ```
+2. Install dependencies:
+    ```bash
+   npm install
+   ```
+3. Create a .env file in the project root and add your LinkedIn credentials;
+
+
+## Usage
+ ```bash
+   npx ts-node src/main.ts --site linkedin --headless
+   ```
+   - Options:
+
+      -  --site: Specify the site to automate (currently supports linkedin)
+
+      -  --headless: Run browser in headless mode (default is false)
+
