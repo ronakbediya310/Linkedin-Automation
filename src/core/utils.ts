@@ -1,24 +1,27 @@
 import { Page } from 'playwright';
 
 /**
- * Generates a random delay (in milliseconds) between min and max.
- * @param min Minimum delay in ms (default 300ms)
- * @param max Maximum delay in ms (default 1500ms)
+ * Waits for a random duration between the given min and max milliseconds.
+ *
+ * @param min - Minimum delay in milliseconds (default: 300)
+ * @param max - Maximum delay in milliseconds (default: 1500)
  */
 export const randomDelay = async (min = 300, max = 1500): Promise<void> => {
-  const delay = Math.floor(Math.random() * (max - min + 1)) + min;
+  const boundedMin = Math.max(0, min);
+  const boundedMax = Math.max(boundedMin, max);
+  const delay = Math.floor(Math.random() * (boundedMax - boundedMin + 1)) + boundedMin;
   return new Promise((resolve) => setTimeout(resolve, delay));
 };
 
 /**
- * Types the provided text into the given selector on the page,
- * simulating human typing with randomized delay between keystrokes.
+ * Types text into a specified selector on the page, simulating human typing
+ * with randomized delays between keystrokes.
  *
- * @param page Playwright Page object
- * @param selector Selector string to type into
- * @param text Text to type
- * @param charDelayMin Minimum delay between keystrokes in ms (default 100)
- * @param charDelayMax Maximum delay between keystrokes in ms (default 300)
+ * @param page - Playwright Page instance
+ * @param selector - Selector for the input element
+ * @param text - Text to type into the element
+ * @param charDelayMin - Minimum delay between keystrokes in milliseconds (default: 100)
+ * @param charDelayMax - Maximum delay between keystrokes in milliseconds (default: 300)
  */
 export const typeWithDelay = async (
   page: Page,
@@ -27,15 +30,24 @@ export const typeWithDelay = async (
   charDelayMin = 100,
   charDelayMax = 300
 ): Promise<void> => {
+  if (!selector || typeof selector !== 'string') {
+    throw new Error('Invalid selector provided to typeWithDelay.');
+  }
+
+  if (!text || typeof text !== 'string') {
+    throw new Error('Invalid text provided to typeWithDelay.');
+  }
+
+  const boundedMin = Math.max(0, charDelayMin);
+  const boundedMax = Math.max(boundedMin, charDelayMax);
+
   try {
     for (const char of text) {
-      const delay = Math.floor(Math.random() * (charDelayMax - charDelayMin + 1)) + charDelayMin;
+      const delay = Math.floor(Math.random() * (boundedMax - boundedMin + 1)) + boundedMin;
       await page.type(selector, char, { delay });
-      // Small pause between characters for extra naturalness
       await randomDelay(50, 150);
     }
   } catch (error) {
-    console.error(`❌ Error typing into selector "${selector}":`, error);
-    throw error;
+    throw new Error(`Failed to type text into selector "${selector}": ${(error as Error).message}`);
   }
 };
