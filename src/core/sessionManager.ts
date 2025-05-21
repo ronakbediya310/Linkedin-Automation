@@ -1,3 +1,5 @@
+// src/core/sessionManager.ts
+
 import { BrowserContext } from 'playwright';
 import fs from 'fs';
 import path from 'path';
@@ -5,41 +7,47 @@ import { config } from './config';
 import { log } from './logger';
 
 /**
- * Returns the full file path to store session cookies for a specific site.
+ * Returns the full file path where session cookies will be stored.
  * @param site - Name of the site (e.g., 'linkedin')
  */
-const sessionFile = (site: string): string =>
-  path.join(config.sessionPath ?? 'sessions', `${site}.json`);
+const getSessionFilePath = (site: string): string => {
+  const sessionDir = config.sessionPath || 'sessions';
+  return path.join(sessionDir, `${site}.json`);
+};
 
 /**
- * Saves cookies from the given browser context to a session file.
- * Useful for maintaining login state across runs.
- * @param context - Playwright BrowserContext instance
- * @param site - Site identifier
+ * Saves browser context cookies to a session file.
+ * This allows preserving login state between automation runs.
+ *
+ * @param context - Playwright browser context
+ * @param site - Identifier of the site (e.g., 'linkedin')
  */
 export const saveSession = async (context: BrowserContext, site: string): Promise<void> => {
   try {
     const cookies = await context.cookies();
+    const filePath = getSessionFilePath(site);
 
-    fs.mkdirSync(config.sessionPath ?? 'sessions', { recursive: true });
-    fs.writeFileSync(sessionFile(site), JSON.stringify(cookies, null, 2));
-    log.info(`💾 Session saved: ${sessionFile(site)}`);
+    fs.mkdirSync(path.dirname(filePath), { recursive: true });
+    fs.writeFileSync(filePath, JSON.stringify(cookies, null, 2));
+
+    log.info(`Session saved to: ${filePath}`);
   } catch (error) {
-    log.error(`❌ Failed to save session for ${site}: ${(error as Error).message}`);
+    log.error(`Failed to save session for "${site}": ${(error as Error).message}`);
   }
 };
 
 /**
- * Loads cookies from a session file into the given browser context.
- * Automatically skips if no session file exists.
- * @param context - Playwright BrowserContext instance
- * @param site - Site identifier
+ * Loads cookies from a session file and injects them into the browser context.
+ * Skips loading if the session file does not exist.
+ *
+ * @param context - Playwright browser context
+ * @param site - Identifier of the site (e.g., 'linkedin')
  */
 export const loadSession = async (context: BrowserContext, site: string): Promise<void> => {
-  const filePath = sessionFile(site);
+  const filePath = getSessionFilePath(site);
 
   if (!fs.existsSync(filePath)) {
-    log.warn(`⚠️ No session found for ${site}, starting fresh.`);
+    log.warn(`Session file not found for "${site}". A fresh session will be used.`);
     return;
   }
 
@@ -47,8 +55,9 @@ export const loadSession = async (context: BrowserContext, site: string): Promis
     const raw = fs.readFileSync(filePath, 'utf-8');
     const cookies = JSON.parse(raw);
     await context.addCookies(cookies);
-    log.info(`✅ Session loaded: ${filePath}`);
+
+    log.info(`Session loaded from: ${filePath}`);
   } catch (error) {
-    log.error(`❌ Failed to load session for ${site}: ${(error as Error).message}`);
+    log.error(`Failed to load session for "${site}": ${(error as Error).message}`);
   }
 };
